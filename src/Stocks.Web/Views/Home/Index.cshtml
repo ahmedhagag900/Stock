@@ -1,0 +1,32 @@
+﻿@model IEnumerable<Stocks.Application.Models.StockModel>
+@{
+    ViewData["Title"] = "Trades";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Welcome to Stock Trades</h1>
+</div>
+
+<div>
+    <table class="table table-striped table-bordered">
+        <thead class="thead-light">
+            <tr>
+                <th>Stock Name</th>
+                <th>Stock Price</th>
+                <th>Date</th>
+                <th>Details</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach(var stock in Model)
+            {
+                <tr>
+                    <td>@stock.StockName</td>
+                    <td>@stock.StockPrice?.StockPrice</td>
+                    <td>@stock.StockPrice?.StockDate</td>
+                    <td><a class="btn btn-info" asp-action="Details">Detail</a></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
