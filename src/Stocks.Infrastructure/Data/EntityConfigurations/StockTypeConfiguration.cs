@@ -19,7 +19,7 @@ namespace Stocks.Infrastructure.Data.EntityConfigurations
             builder.Property(x => x.Id).ValueGeneratedOnAdd();
 
             builder.HasIndex(x => x.Code).IsUnique();
-            builder.HasMany(x => x.StockPrices).WithOne().OnDelete(DeleteBehavior.Restrict);
+            builder.HasMany(x => x.StockPrices).WithOne().HasForeignKey(x=>x.StockId).OnDelete(DeleteBehavior.Cascade);
 
         }
     }

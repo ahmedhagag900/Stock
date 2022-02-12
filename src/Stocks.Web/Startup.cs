@@ -14,6 +14,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Stocks.Application.SignalR;
+using Stocks.Core.UOW;
+using Stocks.Web.Middlewares;
 
 namespace Stocks.Web
 {
@@ -38,12 +41,14 @@ namespace Stocks.Web
                      sqlOpt.EnableRetryOnFailure(maxRetryCount: 5, maxRetryDelay: TimeSpan.FromSeconds(30), errorNumbersToAdd: null);
                  });
             });
+            services.AddSignalR(config => config.EnableDetailedErrors = true);
             services.AddAutoMapper(typeof(IStockService).Assembly);
             services.ConfigureApplicationDependencies();
             services.ConfigureInfrastructureDependencies();
             services.AddHostedService<StockUpdatesBackgroundJob>();
             services.AddControllersWithViews();
-            
+
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -63,11 +68,14 @@ namespace Stocks.Web
 
             app.UseAuthorization();
 
+            app.UseMiddleware<TransactionMiddleware>();
+
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute(
                     name: "default",
-                    pattern: "{controller=Home}/{action=Index}/{id?}");
+                    pattern: "{controller=Stock}/{action=Index}/{id?}");
+                endpoints.MapHub<StockHub>("/stockHub");
             });
         }
     }

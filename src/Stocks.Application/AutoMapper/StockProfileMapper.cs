@@ -13,7 +13,7 @@ namespace Stocks.Application.AutoMapper
     {
         public StockProfileMapper()
         {
-            CreateMap<Stock, StockModel>()
+            CreateMap<Stock, StockIndexModel>()
                 .ForMember(dest => dest.StockId, opt => opt.MapFrom(src => src.Id))
                 .ForMember(dest => dest.StockName, opt => opt.MapFrom(src => src.Name))
                 .ForMember(dest => dest.StockPrice, opt => opt.MapFrom(src => new StockPriceModel
@@ -25,11 +25,13 @@ namespace Stocks.Application.AutoMapper
             CreateMap<Stock, StockDetailModel>()
                 .ForMember(dest => dest.StockId, opt => opt.MapFrom(src => src.Id))
                 .ForMember(dest => dest.StockName, opt => opt.MapFrom(src => src.Name))
-                .ForMember(dest => dest.StockPrices, opt => opt.MapFrom(src => src.StockPrices.Select(x => new StockPriceModel
+                .ForMember(dest => dest.StockPrices, opt => opt.MapFrom(src => src.StockPrices.OrderByDescending(x=>x.ChangeDate).Select(x => new StockPriceModel
                 {
                     StockPrice = x.Price,
                     StockDate = x.ChangeDate
                 })));
+            CreateMap<StockDetailModel, StockModel>()
+                .ForMember(dest => dest.StockPrice, opt => opt.MapFrom(src => src.StockPrices.OrderByDescending(o => o.StockDate).Select(x => x.StockPrice).FirstOrDefault()));
         }
     }
 }

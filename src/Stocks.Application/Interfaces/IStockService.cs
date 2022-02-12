@@ -10,11 +10,11 @@ namespace Stocks.Application.Interfaces
 {
     public interface IStockService
     {
-        Task<IEnumerable<StockModel>> GetAllStocksAsync();
-        Task<IEnumerable<StockModel>> PerformRandomStockPriceUpdates();
+        Task<IEnumerable<StockIndexModel>> GetAllStocksAsync();
+        Task<IEnumerable<StockIndexModel>> PerformRandomStockPriceUpdates();
         Task<StockDetailModel> GetStockInfoAsync(long stockId);
-        Task<StockModel> UpdateStockInfoAsync(StockArgument args);
-        Task<StockModel> AddStockAsync(StockArgument args);
+        Task<StockIndexModel> UpdateStockInfoAsync(StockArgument args);
+        Task<StockIndexModel> AddStockAsync(StockArgument args);
         Task DeleteStockAsync(long stockId);
     }
 }

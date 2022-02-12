@@ -25,5 +25,9 @@ namespace Stocks.Web.HostedServices
                 await jobExcueter.ExceuteAsync(stoppingToken);
             }
         }
+        public override Task StopAsync(CancellationToken cancellationToken)
+        {
+            return base.StopAsync(cancellationToken);
+        }
     }
 }

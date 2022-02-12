@@ -11,12 +11,10 @@ namespace Stocks.Infrastructure.Data.UOW
     public class UnitOfWork : IUnitOfWork, IDisposable
     {
         private readonly StockDbContext _context;
-        private readonly ILogger<UnitOfWork> _logger;
         private readonly IStockRepository _stockRepo;
-        public UnitOfWork(StockDbContext context, IStockRepository stockRepo,ILogger<UnitOfWork> logger)
+        public UnitOfWork(StockDbContext context, IStockRepository stockRepo)
         {
             _context = context;
-            _logger = logger;
             _stockRepo = stockRepo;
         }
 
@@ -24,28 +22,28 @@ namespace Stocks.Infrastructure.Data.UOW
 
         public async Task CompleteAsync()
         {
-            try
-            {
-                var stratagy=_context.Database.CreateExecutionStrategy();
-                await stratagy.ExecuteAsync(async () =>
-                {
+            await _context.SaveChangesAsync();
+            //try
+            //{
+            //    var stratagy=_context.Database.CreateExecutionStrategy();
+            //    await stratagy.ExecuteAsync(async () =>
+            //    {
 
-                    _logger.LogInformation("Transaction Begins");
-                    await _context.BeginTransactionAsync();
-                    await _context.SaveChangesAsync();
-                    await _context.CommitTransactionAsync();
-                    _logger.LogInformation("Transaction commited");
+            //        _logger.LogInformation("Transaction Begins");
+            //        await _context.BeginTransactionAsync();
+            //        await _context.SaveChangesAsync();
+            //        await _context.CommitTransactionAsync();
+            //        _logger.LogInformation("Transaction commited");
+            //    });
+            //}
+            //catch(Exception)
+            //{
 
-                });
-            }
-            catch(Exception)
-            {
-
-                _logger.LogInformation("Transaction failed rolling back");
-                await _context.RollBackTransactionAsync();
-                _logger.LogInformation("Transaction rolled back");
-                throw;
-            }
+            //    _logger.LogInformation("Transaction failed rolling back");
+            //    await _context.RollBackTransactionAsync();
+            //    _logger.LogInformation("Transaction rolled back");
+            //    throw;
+            //}
         }
 
         public void Dispose()

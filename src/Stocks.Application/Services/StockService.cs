@@ -23,7 +23,7 @@ namespace Stocks.Application.Services
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
             _random = new Random();
         }
-        public async Task<StockModel> AddStockAsync(StockArgument args)
+        public async Task<StockIndexModel> AddStockAsync(StockArgument args)
         {
             //prepare stock info
             var stockPrice = new StockPrice
@@ -40,10 +40,9 @@ namespace Stocks.Application.Services
 
             //add it to uow
             stockEntity =await _unitOfWork.StockRepo.AddAsync(stockEntity);
-            await _unitOfWork.CompleteAsync();
 
             //return result after compelation of uow
-            var result = _mapper.Map<StockModel>(stockEntity);
+            var result = _mapper.Map<StockIndexModel>(stockEntity);
             return result;
         }
         public async Task DeleteStockAsync(long stockId)
@@ -52,13 +51,12 @@ namespace Stocks.Application.Services
             if (entityToDelete == null)
                 throw new StockAppException("could not found stock with specified id to delete");
             await _unitOfWork.StockRepo.Delete(entityToDelete);
-            await _unitOfWork.CompleteAsync();
         }
-        public async Task<IEnumerable<StockModel>> GetAllStocksAsync()
+        public async Task<IEnumerable<StockIndexModel>> GetAllStocksAsync()
         {
             var entities = await _unitOfWork.StockRepo.GetByAsync(x => true);
 
-            var result = entities.Select(x => _mapper.Map<StockModel>(x)) 
+            var result = entities.Select(x => _mapper.Map<StockIndexModel>(x)) 
                                  .OrderByDescending(x => x.StockPrice?.StockPrice).ToList();
 
             return result;
@@ -74,7 +72,7 @@ namespace Stocks.Application.Services
 
             return result;
         }
-        public async Task<IEnumerable<StockModel>> PerformRandomStockPriceUpdates()
+        public async Task<IEnumerable<StockIndexModel>> PerformRandomStockPriceUpdates()
         {
             var randomSample = await _unitOfWork.StockRepo.GetRandomStocksAsync(10);
             foreach(var stock in randomSample)
@@ -88,10 +86,10 @@ namespace Stocks.Application.Services
             }
             await _unitOfWork.CompleteAsync();
 
-            var finalResult = randomSample.Select(x => _mapper.Map<StockModel>(x)).ToList();
+            var finalResult = await GetAllStocksAsync();
             return finalResult;
         }
-        public async Task<StockModel> UpdateStockInfoAsync(StockArgument args)
+        public async Task<StockIndexModel> UpdateStockInfoAsync(StockArgument args)
         {
 
             var entity = await _unitOfWork.StockRepo.GetByIdAsync(args.StockId);
@@ -105,9 +103,7 @@ namespace Stocks.Application.Services
                 ChangeDate = DateTime.UtcNow
             });
 
-            await _unitOfWork.CompleteAsync();
-
-            var result = _mapper.Map<StockModel>(entity);
+            var result = _mapper.Map<StockIndexModel>(entity);
             return result;
 
         }

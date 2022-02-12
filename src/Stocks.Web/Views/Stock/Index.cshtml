@@ -1,0 +1,118 @@
+﻿@{
+    ViewData["Title"] = "Trades";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Welcome to Stock Trades</h1>
+</div>
+
+<div>
+    <table class="table table-striped table-bordered" id="stockTable">
+        <thead class="thead-light">
+            <tr>
+                <th>Stock Name</th>
+                <th>Stock Price</th>
+                <th>Date</th>
+                <th>Details</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+
+    </table>
+
+</div>
+
+@section Scripts{
+    <script src="~/lib/microsoft/signalr/dist/browser/signalr.js"></script>
+
+    <script>
+        const client = new signalR.HubConnectionBuilder().withUrl('/stockHub').configureLogging(signalR.LogLevel.Error).build();
+        var globalStockList = [];
+        client.on("StockUpdates", async function (stocks) {
+            await pobulateStockTable(stocks);
+        });
+
+        client.start();
+
+        function pobulateStockTable(stockList) {
+            if (globalStockList.length == 0) {
+                var tableBody = $("#stockTable tbody");
+                tableBody.html = '';
+                $.each(stockList, function (key, stock) {
+                    var tableRow = '<tr id="' + stock["stockId"] + '">';
+                    tableRow += '<td>' + stock["stockName"] + '</td>';
+                    tableRow += '<td>' + stock["stockPrice"]["stockPrice"] + '</td>';
+                    tableRow += '<td>' + new Date(stock["stockPrice"]["stockDate"]).toUTCString() + '</td>';
+
+                    //from for passing the stock id to details action
+                    tableRow += '<td>';
+                    tableRow += '<form action="stock/details" method="get">';
+                    tableRow += '<input type = "hidden" name = "stockId" value ="' + stock["stockId"]+'" >';
+                    tableRow += '<button class="btn btn-info" type="submit">Details</button>';
+                    tableRow += '</form>';
+                    tableRow += '</td>';
+
+                    tableRow += '</tr>';
+                    tableBody.append(tableRow);
+                });
+                globalStockList = stockList;
+            } else {
+                reorderStocks(stockList);
+            }
+        }
+
+
+        async function reorderStocks(newStockOrder) {
+            for (var i = 0; i < newStockOrder.length; ++i)
+            {
+                var newStock = newStockOrder[i];
+                var oldStock = globalStockList[i];
+                if (newStock["stockId"] != oldStock["stockId"]) {
+
+                    var oldId = '#' + oldStock["stockId"];
+                    var newId = '#' + newStock["stockId"];
+                    newPos = $(oldId)[0].getBoundingClientRect();
+                    oldPos = $(newId)[0].getBoundingClientRect();
+                    $(oldId).empty();
+
+                    var row = '<td>' + newStock["stockName"] + '</td>';
+                    row += '<td>' + newStock["stockPrice"]["stockPrice"] + '</td>';
+                    row += '<td>' + new Date(newStock["stockPrice"]["stockDate"]).toUTCString() + '</td>';
+
+                    //from for passing the stock id to details action
+                    row += '<td>';
+                    row += '<form action="stock/details" method="get">';
+                    row += '<input type = "hidden" name = "stockId" value ="' + newStock["stockId"] + '" >';
+                    row += '<button class="btn btn-info" type="submit">Details</button>';
+                    row += '</form>';
+                    row += '</td>';
+
+                    $(oldId).append(row);
+                    $(oldId).css("transform", "translate(" + newPos.x + "," + newPos.y + ")");
+                    
+                    await timeout(500);
+
+                    var idx = globalStockList.findIndex(x => x["stockId"] == newStock["stockId"]);
+                    globalStockList[idx] = globalStockList[i];
+                    globalStockList[i] = newStockOrder[i];
+                }
+            }
+        }
+        function timeout(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        $(document).ready(() => {
+
+            $.getJSON(
+                '/stock/stocks',
+                function (response) {
+                    pobulateStockTable(response);
+                }
+            )
+        });
+
+
+    </script>
+}

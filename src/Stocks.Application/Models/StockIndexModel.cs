@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 
 namespace Stocks.Application.Models
 {
-    public class StockModel
+    public class StockIndexModel
     {
         public long StockId { get; set; }
         public string StockName { get; set; }
-        public double StockPrice { get; set; }
+        public StockPriceModel StockPrice { get; set; }
     }
 }

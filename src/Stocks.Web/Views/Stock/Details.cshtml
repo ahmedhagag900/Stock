@@ -1,0 +1,77 @@
+﻿@model Stocks.Application.Models.StockDetailModel
+
+@{
+    ViewData["Title"] = "Details";
+}
+
+<h1>Details</h1>
+
+<div>
+    <hr/>
+    <div class="container">
+        <div class="row">
+
+            <div class="col">
+
+                <div class="card">
+                    <div class="card-header">@Model.StockName</div>
+                    <div class="card-body">
+                        <div class="form-row mb-3">
+                            <div class="col">
+                                <strong>Stock Name:</strong>
+                            </div>
+                            <div class="col">
+                                @Html.DisplayFor(model => model.StockName)
+                            </div>
+                        </div>
+                        <div class="form-row mb-3">
+                            <div class="col">
+                                <strong>Stcok Last Update Date :</strong>
+                            </div>
+                            <div class="col">
+                                @Html.DisplayFor(model => Model.StockPrices.FirstOrDefault().StockDate)
+                            </div>
+                        </div>
+                        <div class="form-row mb-3">
+                            <div class="col">
+                                <strong>Stock Last Price :</strong>
+                            </div>
+                            <div class="col">
+                                @Html.DisplayFor(model => Model.StockPrices.FirstOrDefault().StockPrice)
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <a class="btn btn-primary" asp-action="Edit" asp-route-stockId="@Model.StockId">Edit Stock Info</a>
+                        <a class="btn btn-danger" asp-action="Delete" asp-route-stockId="@Model.StockId">Delete Stock</a>
+                        <a class="btn btn-success" asp-action="Add">Add New Stock</a>
+                    </div>
+                </div>
+                <div class="col">
+                    <div id="plot"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+
+@section Scripts{
+    <script src="https://cdn.plot.ly/plotly-2.9.0.min.js"></script>
+    <script>
+        var priceJson = @Html.Raw(Json.Serialize(Model.StockPrices.Select(x => x.StockPrice).ToArray()));
+        var dateJson = @Html.Raw(Json.Serialize(Model.StockPrices.Select(x => x.StockDate).ToArray()));
+
+        var plotData = [{
+            x: dateJson,
+            y: priceJson,
+            type:'scatter'
+        }]
+
+        Plotly.newPlot('plot', plotData);
+    </script>
+
+}
