@@ -11,10 +11,5 @@ namespace Stocks.Application.SignalR
     public class StockHub : Hub<IStockHub>
     {
 
-        public async Task StockUpdates(IEnumerable<StockIndexModel> stocks)
-        {
-            await Clients.All.StockUpdates(stocks);
-        }
-
     }
 }

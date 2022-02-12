@@ -9,6 +9,11 @@ namespace Stocks.Core.Repositories
 {
     public interface IStockRepository:IBaseRepository<Stock>
     {
+        /// <summary>
+        /// get radnom stock data
+        /// </summary>
+        /// <param name="numOfStocks">number of random stock</param>
+        /// <returns></returns>
         Task<IEnumerable<Stock>> GetRandomStocksAsync(int numOfStocks);
     }
 }

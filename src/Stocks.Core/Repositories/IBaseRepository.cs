@@ -7,6 +7,10 @@ using System.Threading.Tasks;
 
 namespace Stocks.Core.Repositories
 {
+    /// <summary>
+    /// base repo used for general operation
+    /// </summary>
+    /// <typeparam name="Entity">entity type</typeparam>
     public interface IBaseRepository<Entity> where Entity : class 
     {
         Task<Entity> AddAsync(Entity type);

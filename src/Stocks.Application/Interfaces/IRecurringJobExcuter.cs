@@ -9,6 +9,11 @@ namespace Stocks.Application.Interfaces
 {
     public interface IRecurringJobExcuter
     {
+        /// <summary>
+        /// excuete recurring job
+        /// </summary>
+        /// <param name="cancellationToken">cancelation token to abort the job</param>
+        /// <returns></returns>
         Task ExceuteAsync(CancellationToken cancellationToken);
     }
 }
