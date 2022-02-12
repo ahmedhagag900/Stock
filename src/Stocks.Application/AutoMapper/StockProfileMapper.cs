@@ -20,7 +20,10 @@ namespace Stocks.Application.AutoMapper
                 {
                     StockPrice = src.StockPrices.OrderByDescending(x => x.ChangeDate).Select(x => x.Price).FirstOrDefault(),
                     StockDate = src.StockPrices.OrderByDescending(x => x.ChangeDate).Select(x => x.ChangeDate).FirstOrDefault()
-                }));
+                })).ForMember(dest => dest.StockState, opt => opt.MapFrom(src => src.StockPrices.Count() <= 1 ? true :
+                          src.StockPrices.OrderByDescending(o => o.ChangeDate).Select(x => x.Price).FirstOrDefault() >=
+                          src.StockPrices.OrderByDescending(o => o.ChangeDate).Select(x => x.Price).Take(2).ToList()[1]
+                       ));
             
             CreateMap<Stock, StockDetailModel>()
                 .ForMember(dest => dest.StockId, opt => opt.MapFrom(src => src.Id))
