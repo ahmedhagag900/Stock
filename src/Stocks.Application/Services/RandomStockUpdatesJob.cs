@@ -21,7 +21,7 @@ namespace Stocks.Application.Services
             {
                 var stockUpdates = await _stockService.PerformRandomStockPriceUpdates();
                 await _hubContext.Clients.All.StockUpdates(stockUpdates);
-                await Task.Delay(5 * 1000);
+                await Task.Delay(10 * 1000);
             }
         }
     }
