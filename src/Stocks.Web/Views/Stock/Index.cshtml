@@ -26,6 +26,8 @@
     <script src="~/lib/microsoft/signalr/dist/browser/signalr.js"></script>
 
     <script>
+
+        //configure signalr for real time application
         const client = new signalR.HubConnectionBuilder().withUrl('/stockHub').configureLogging(signalR.LogLevel.Error).build();
         var globalStockList = [];
         client.on("StockUpdates", async function (stocks) {
@@ -34,12 +36,13 @@
 
         client.start();
 
+        //function to populate div table with stock info
         function pobulateStockTable(stockList) {
             if (globalStockList.length == 0) {
                 var tableBody = $("#stockTable tbody");
                 tableBody.html = '';
                 $.each(stockList, function (key, stock) {
-                    var tableRow = '<tr id="' + stock["stockId"] + '">';
+                    var tableRow = '<tr id="' + key + '">';
                     tableRow += '<td>' + stock["stockName"] + '</td>';
 
                     if (stock["stockState"] == true) {
@@ -67,47 +70,50 @@
             }
         }
 
-
+        //function loads the pushed stock with signalr
         async function reorderStocks(newStockOrder) {
-            for (var i = 0; i < newStockOrder.length; ++i)
+
+
+            var currentTableRowCount = $('#stockTable tbody tr').length;
+            var gCount = 0;
+            for (var i = 0; i < newStockOrder.length; ++i, gCount++)
             {
+
                 var newStock = newStockOrder[i];
-                var oldStock = globalStockList[i];
-                if (newStock["stockId"] != oldStock["stockId"]) {
+                var row = '<td>' + newStock["stockName"] + '</td>';
 
-                    var oldId = '#' + oldStock["stockId"];
-                    var newId = '#' + newStock["stockId"];
-                    newPos = $(oldId)[0].getBoundingClientRect();
-                    oldPos = $(newId)[0].getBoundingClientRect();
-                    $(oldId).empty();
-
-                    var row = '<td>' + newStock["stockName"] + '</td>';
-
-                    if (newStock["stockState"] == true) {
-                        row += '<td>' + newStock["stockPrice"]["stockPrice"] + ' $ <button class="btn btn-success btn-sm ml-4"><i class="bi bi-arrow-up"></i></button></td>';
-                    } else {
-                        row += '<td>' + newStock["stockPrice"]["stockPrice"] + ' $ <button class="btn btn-danger btn-sm ml-4"><i class="bi bi-arrow-down"></i></button></td>';
-                    }
-
-                    row += '<td>' + new Date(newStock["stockPrice"]["stockDate"]).toUTCString() + '</td>';
-
-                    //from for passing the stock id to details action
-                    row += '<td>';
-                    row += '<form action="stock/details" method="get">';
-                    row += '<input type = "hidden" name = "stockId" value ="' + newStock["stockId"] + '" >';
-                    row += '<button class="btn btn-info" type="submit">Details</button>';
-                    row += '</form>';
-                    row += '</td>';
-
-                    $(oldId).append(row);
-                    $(oldId).css("transform", "translate(" + newPos.x + "," + newPos.y + ")");
-                    
-                    await timeout(1000);
-
-                    var idx = globalStockList.findIndex(x => x["stockId"] == newStock["stockId"]);
-                    globalStockList[idx] = globalStockList[i];
-                    globalStockList[i] = newStockOrder[i];
+                if (newStock["stockState"] == true) {
+                    row += '<td>' + newStock["stockPrice"]["stockPrice"] + ' $ <button class="btn btn-success btn-sm ml-4"><i class="bi bi-arrow-up"></i></button></td>';
+                } else {
+                    row += '<td>' + newStock["stockPrice"]["stockPrice"] + ' $ <button class="btn btn-danger btn-sm ml-4"><i class="bi bi-arrow-down"></i></button></td>';
                 }
+
+                row += '<td>' + new Date(newStock["stockPrice"]["stockDate"]).toUTCString() + '</td>';
+
+                //from for passing the stock id to details action
+                row += '<td>';
+                row += '<form action="stock/details" method="get">';
+                row += '<input type = "hidden" name = "stockId" value ="' + newStock["stockId"] + '" >';
+                row += '<button class="btn btn-info" type="submit">Details</button>';
+                row += '</form>';
+                row += '</td>';
+
+
+                if (i < currentTableRowCount) {
+                    var child = $('#'+i);
+                    child.empty();
+                    child.append(row);
+                    
+                } else {
+                    console.log('newItemAdded');
+                    var newRow = '<tr id"' + i + '">' + row + '</tr>';
+                    $('#stockTable tbody').append(newRow);
+                }
+                await timeout(1000);
+            }
+            for (var i = gCount; i < currentTableRowCount; ++i) {
+                var element = $('#' + i);
+                element.empty();
             }
         }
         function timeout(ms) {
